@@ -40,9 +40,13 @@ func (fs *BtrfsFilesystem) Create(bytes uint64) error {
 			lo="$(losetup -f --show $IMAGE_PATH)"
 		fi
 
-		if ! file $IMAGE_PATH | grep BTRFS; then
-			mkfs.btrfs --nodiscard $IMAGE_PATH
-		fi
+                if ! file $IMAGE_PATH | grep BTRFS; then
+                        incompat_features=""
+                        if [ "$(uname -m)" == "ppc64le" ]; then
+                                 incompat_features="-O ^extref"
+                        fi
+                        mkfs.btrfs $incompat_features --nodiscard $IMAGE_PATH
+                fi
 
 		mkdir -p $MOUNT_PATH
 
